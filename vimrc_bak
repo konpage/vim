@@ -246,6 +246,8 @@ set laststatus=2
 " Format the status line
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
 
+" set current line
+set cursorline
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Editing mappings
@@ -399,19 +401,113 @@ endfunction
 
 
 
-" Kang Peijan
-" for plugin ctag
-set tags=/usr/include/tags;   " semicolon MUST be added
-set autochdir
+"
+"  vim plugins manager =>vundle
+"  vundle {
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/vundle
+call vundle#rc()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+" }
+"
+" let Vundle manage Vundle, required
+"Plugin 'gmarik/Vundle.vim'
+Bundle 'gmarik/Vundle.vim'
+
+"
+" My Bundles here:
+"
+"=======> original repos on github
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+"
+" a) plugin on GitHub repo
+" Plugin 'tpope/vim-fugitive'
+Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-rails.git'
+Bundle 'Lokaltog/vim-easymotion'
+
+"
+" b) plugin from http://vim-scripts.org/vim/scripts.html
+" Plugin 'L9'
+Bundle 'L9'
+
+"
+" c) Git plugin not hosted on GitHub
+" Plugin 'git://git.wincent.com/command-t.git'
+"
+" d) git repos on your local machine (i.e. when working on your own plugin)
+" Plugin 'file:///home/gmarik/path/to/plugin'
+" The sparkup vim script is in a subdirectory of this repo called vim.
+" Pass the path to set the runtimepath properly.
+" Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
+Bundle 'scrooloose/nerdtree'
+
+" Avoid a name conflict with L9
+" Plugin 'user/L9', {'name': 'newL9'}
+"<========= original repo on github OK!
 
 
-" for plugins taglist
-let Tlist_Ctags_Cmd='/usr/bin/ctags'
-let Tlist_Show_One_File=1
-let Tlist_OnlyWindow=1
+" using the following plugins LIKE a)
+Bundle 'taglist.vim'
+Bundle 'SuperTab'
+Bundle 'vimwiki'
+Bundle 'winmanager'
+Bundle 'bufexplorer.zip'
+"Bundle 'matrix.vim--Yang'
+Bundle 'c.vim'
+
+" All of your Plugins must be added before the following line
+"call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+
+
+" ===================================
+" plugins configuration
+" ===================================
+
+
+" ---------------------------------------------------------------
+" ctags
+" desc: index the symbol
+" gen ctags: map <C-F12> :!ctags -R --c++=+p --fields=+iaS --extra=+q .<CR>
+" usage:  :ts  :tp :tn :C+] :C+T
+if filereadable("tags")
+    set tags=tags
+elseif filereadable("usr/include/tags")
+    set tags=/usr/include/tags
+endif
+
+
+
+" ---------------------------------------------------------------
+" taglist
+" desc:  list the tags
+" usage: in the taglist window, u(update the tag) [[(the prev file) ]](the
+"        next file)
+let Tlist_Show_One_File=1          " only show the tags of the current file
+let Tlist_Exit_OnlyWindow=1        " if taglist is last windown, exit vim
+let Tlist_Ctags_Cmd="/usr/bin/ctags" " combine taglist and ctags
+let Tlist_OnlyWindow=0
 let Tlist_Use_Right_Window=0
 let Tlist_Sort_Type='name'
-let Tlist_Exit_OnlyWindow=1         
 let Tlist_Show_Menu=1         
 let Tlist_Max_Submenu_Items=10
 let Tlist_Max_Tag_length=20
@@ -422,73 +518,108 @@ let Tlist_File_Fold_Auto_Close=1
 let Tlist_GainFocus_On_ToggleOpen=0
 let Tlist_Process_File_Always=1
 let Tlist_WinHeight=10
-let Tlist_WinWidth=18
+let Tlist_WinWidth=25
 let Tlist_Use_Horiz_Window=0
 
-"这样就可以用 ",tl" 命令进行taglist窗口的打开和关闭之间方便切换了. // 这里
-"的","是我.vimrc设置的leader, 你也可以设置成别的, 在.vimrc中修改即可, 如我
-"的: let mapleader=","
-map <silent> <leader>tl :TlistToggle<CR>
 
 
-" for plugin sketch
-command -nargs=0 ToggleSketch call ToggleSketch()
 
-"bufexplorer
-let g:winManagerWindowLayout='FileExplorer|BufExplorer'  " 这里可以设置为多个窗口, 如'FileExplorer|BufExplorer|TagList'
-let g:persistentBehaviour=0             "只剩一个窗口时, 退出vim.
+" ---------------------------------------------------------------
+" cscope
+" desc: to find the definition of the symbol, with ctags
+" gen db: in project root path: cscope -Rbq -f path/xxx.out
+"         in vim view: cs add path/xxx.out
+" usage: CTRL+_, g(go to the definition) etc.
+if has("cscope")
+    " set cscopequickfix=s-,c-,d-,i-,t-,e-
+
+    set cscopetag
+    " check cscope for definition of a symbol before checking ctags:
+    " set to 1 if you want the reverse search order.
+    set csto=1
+
+    if filereadable("cscope.out")
+        cs add cscope.out
+    elseif $CSCOPE_DB != ""
+        cs add $CSCOPE_DB
+    endif
+
+    "show msg when any other cscope db added
+    set cscopeverbose
+
+    nmap <C-_>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>f :cs find f <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>i :cs find i <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-_>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+endif
+
+
+" ---------------------------------------------------------------
+" winManager 
+" desc:
+" usage:
+let g:winManagerWindowLayout='FileExplorer,TagsExplorer|TagList'
+map wm :WMToggle<CR>
+
+
+
+" ---------------------------------------------------------------
+" bufexplorer
+" desc:
+" usage:
+let g:winManagerWindowLayout='FileExplorer|BufExplorer' 
+let g:persistentBehaviour=0            
 let g:winManagerWidth=20
 let g:defaultExplorer=1
 nmap <silent> <leader>fir :FirstExplorerWindow<cr>
 nmap <silent> <leader>bot :BottomExplorerWindow<cr>
 nmap <silent> <leader>wm :WMToggle<cr>
 
-"cscope
-if has("cscope")
-     set cscopetag   " 使支持用 Ctrl+]  和 Ctrl+t 快捷键在代码间跳来跳去
-     " check cscope for definition of a symbol before checking ctags:
-     " set to 1 if you want the reverse search order.
-     set csto=1
-    
-     "add any cscope database in current directory
-     if filereadable("cscope.out")
-        cs add cscope.out
-     "else add the database pointed to by environment variable
-     elseif $CSCOPE_DB !=""
-        cs add $CSCOPE_DB
-     endif
-    
-     "show msg when any other cscope db added
-     set cscopeverbose
-    
-     nmap <C-/>s :cs find s <C-R>=expand("<cword>")<CR><CR>
-     nmap <C-/>g :cs find g <C-R>=expand("<cword>")<CR><CR>
-     nmap <C-/>c :cs find c <C-R>=expand("<cword>")<CR><CR>
-     nmap <C-/>t :cs find t <C-R>=expand("<cword>")<CR><CR>
-     nmap <C-/>e :cs find e <C-R>=expand("<cword>")<CR><CR>
-     nmap <C-/>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
-     nmap <C-/>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
-     nmap <C-/>d :cs find d <C-R>=expand("<cword>")<CR><CR>
-endif
 
 
+
+" ---------------------------------------------------------------
+" SuperTab
+" desc:
+" usage: TAB
+"let g:SuperTabDefaultCompletionType="<C-X><C-O>"
+
+
+
+
+" ---------------------------------------------------------------
 "project
-" 切换打开和关闭project窗口
-nmap <silent> <Leader>P <Plug>ToggleProject
-" 插件项目窗口宽度.    默认值: 24
-let g:proj_window_width=20 " 当按空格键 <space> 或者单击鼠标左 <LeftMouse>时项目窗口宽度增加量,默认值:100
+" desc:
+" usage:
+let g:proj_window_width=20 
 let g:proj_window_increment=90
-let g:proj_flags='i'    "当选择打开一个文件时会在命令行显示文件名和当前工作路径.
-let g:proj_flags='m'    "在常规模式下开启 |CTRL-W_o| 和|CTRL-W_CTRL_O| 映射, 使得当前缓冲区成为唯一可见的缓冲区, 但是项目窗口仍然可见.
-let g:proj_flags='s'    "开启语法高亮.
-let g:proj_flags='t'    "用按 <space> 进行窗口加宽.
-let g:proj_flags='c'    "设置后, 在项目窗口中打开文件后会自动关闭项目窗口.
-"let g:proj_flags='F'   "显示浮动项目窗口. 关闭窗口的自动调整大小和窗口替换.
-let g:proj_flags='L'    "自动根据CD设置切换目录.
-"let g:proj_flags='n'    "显示行号.
-let g:proj_flags='S'    "启用排序.
-let g:proj_flags='T'    "子项目的折叠在更新时会紧跟在当前折叠下方显示(而不是其底部).
-let g:proj_flags='v'    "设置后将, 按 /G 搜索时用 :vimgrep 取代 :grep.
-"let g:proj_run1='!p4 edit %f'    "g:proj_run1 ...  g:proj_run9 用法.
+let g:proj_flags='i'    
+let g:proj_flags='m'   
+let g:proj_flags='s'  
+let g:proj_flags='t' 
+let g:proj_flags='c'
+"let g:proj_flags='F'   
+let g:proj_flags='L'   
+"let g:proj_flags='n' 
+let g:proj_flags='S'  
+let g:proj_flags='T' 
+let g:proj_flags='v'  
+"let g:proj_run1='!p4 edit %f'  
 let g:proj_run3='silent !gvim %f'
+
+nmap <silent> <Leader>P <Plug>ToggleProject
+
+
+" ---------------------------------------------------------------
+" sketch
+" desc:
+" usage:
+"command -nargs=0 ToggleSketch call ToggleSketch()
+
+
+
 
