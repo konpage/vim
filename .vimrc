@@ -163,10 +163,11 @@ set smarttab
 " 1 tab == 4 spaces
 set shiftwidth=4
 set tabstop=4
+set softtabstop=4
 
 " Linebreak on 500 characters
 set lbr
-set tw=500
+set tw=135
 
 set ai "Auto indent
 set si "Smart indent
@@ -504,7 +505,11 @@ endif
 "        next file)
 let Tlist_Show_One_File=1          " only show the tags of the current file
 let Tlist_Exit_OnlyWindow=1        " if taglist is last windown, exit vim
-let Tlist_Ctags_Cmd="/usr/bin/ctags" " combine taglist and ctags
+if has("unix")
+    let Tlist_Ctags_Cmd="/opt/local/bin/ctags" " combine taglist and ctags
+else
+    let Tlist_Ctags_Cmd="/usr/bin/ctags" " combine taglist and ctags
+endif
 let Tlist_OnlyWindow=0
 let Tlist_Use_Right_Window=0
 let Tlist_Sort_Type='name'
@@ -518,7 +523,7 @@ let Tlist_File_Fold_Auto_Close=1
 let Tlist_GainFocus_On_ToggleOpen=0
 let Tlist_Process_File_Always=1
 let Tlist_WinHeight=10
-let Tlist_WinWidth=25
+let Tlist_WinWidth=35
 let Tlist_Use_Horiz_Window=0
 
 
@@ -559,21 +564,12 @@ endif
 
 
 " ---------------------------------------------------------------
-" winManager 
+" winManager&bufexplorer 
 " desc:
 " usage:
-let g:winManagerWindowLayout='FileExplorer,TagsExplorer|TagList'
-map wm :WMToggle<CR>
-
-
-
-" ---------------------------------------------------------------
-" bufexplorer
-" desc:
-" usage:
-let g:winManagerWindowLayout='FileExplorer|BufExplorer' 
+let g:winManagerWindowLayout='FileExplorer,BufExplorer|TagList'
 let g:persistentBehaviour=0            
-let g:winManagerWidth=20
+let g:winManagerWidth=35
 let g:defaultExplorer=1
 nmap <silent> <leader>fir :FirstExplorerWindow<cr>
 nmap <silent> <leader>bot :BottomExplorerWindow<cr>
@@ -622,4 +618,39 @@ nmap <silent> <Leader>P <Plug>ToggleProject
 
 
 
+
+" ---------------------------------------------------------------
+" Code commenter
+" desc:
+" usage:
+" command 
+"
+""""autocmd BufNewFile *.[ch],*.hpp,*.cpp exec :call SetFileHead()
+function! SetFileHead()
+    call setline(1, "/**")
+    call append(line("."), "* Copyright (c) ".strftime("%Y")." All Rights  reserved.")
+    call append(line(".")+1, "* ")
+    call append(line(".")+2, "* filename: ".expand("%:t"))
+    call append(line(".")+3, "* author  : konpage")
+    call append(line(".")+4, "* date    : ".strftime("%Y-%m-%d"))
+    call append(line(".")+5, "* ")
+    call append(line(".")+6, "* description:")
+    call append(line(".")+7, "*/")
+endfunction
+
+map <F4> :call SetFuncHead()<cr>
+" add the comment for function
+function! SetFuncHead()
+    call append(line("."),  "/**")
+    call append(line(".")+1, "* @brief ")
+    call append(line(".")+2, "* @fn ")
+    call append(line(".")+3, "* @para[in] ")
+    call append(line(".")+4, "* @para[out] ")
+    call append(line(".")+5, "* @returns ")
+    call append(line(".")+6, "* ")
+    call append(line(".")+7, "* @note ")
+    call append(line(".")+8, "* @warnning ")
+    call append(line(".")+9, "* ")
+    call append(line(".")+10, "*/")
+endfunction
 
