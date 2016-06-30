@@ -491,9 +491,10 @@ filetype plugin indent on    " required
 " gen ctags: map <C-F12> :!ctags -R --c++=+p --fields=+iaS --extra=+q .<CR>
 " usage:  :ts  :tp :tn :C+] :C+T
 if filereadable("tags")
-    set tags=tags
+    set tags=tags;
+    set autochdir
 elseif filereadable("usr/include/tags")
-    set tags=/usr/include/tags
+    set tags=/usr/include/tags;
 endif
 
 
