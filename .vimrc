@@ -328,7 +328,7 @@ map <leader>s? z=
 " => Misc
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Remove the Windows ^M - when the encodings gets messed up
-noremap <Leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
+noremap <leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 
 " Quickly open a buffer for scripbble
 map <leader>q :e ~/buffer<cr>
@@ -488,7 +488,7 @@ filetype plugin indent on    " required
 " ---------------------------------------------------------------
 " ctags
 " desc: index the symbol
-" gen ctags: map <C-F12> :!ctags -R --c++=+p --fields=+iaS --extra=+q .<CR>
+" gen ctags: map <F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . /usr/include /usr/local/include<CR>
 " usage:  :ts  :tp :tn :C+] :C+T
 if filereadable("tags")
     set tags=tags;
@@ -496,6 +496,7 @@ if filereadable("tags")
 elseif filereadable("usr/include/tags")
     set tags=/usr/include/tags;
 endif
+map <F10> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . /usr/include /usr/local/include<CR>
 
 
 
@@ -533,9 +534,10 @@ let Tlist_Use_Horiz_Window=0
 " ---------------------------------------------------------------
 " cscope
 " desc: to find the definition of the symbol, with ctags
-" gen db: in project root path: cscope -Rbq -f path/xxx.out
+" gen db: in project root path: map <F11> :!cscope -Rbq -I. -I/usr/include<CR>
 "         in vim view: cs add path/xxx.out
 " usage: CTRL+_, g(go to the definition) etc.
+" CTRL+s is flow control in compute, CTRL+q ends up.
 if has("cscope")
     " set cscopequickfix=s-,c-,d-,i-,t-,e-
 
@@ -562,7 +564,7 @@ if has("cscope")
     nmap <C-_>i :cs find i <C-R>=expand("<cword>")<CR><CR>
     nmap <C-_>d :cs find d <C-R>=expand("<cword>")<CR><CR>
 endif
-
+map <F11> :!cscope -Rbq -I. -I/usr/include<CR>
 
 " ---------------------------------------------------------------
 " winManager&bufexplorer 
@@ -608,7 +610,7 @@ let g:proj_flags='v'
 "let g:proj_run1='!p4 edit %f'  
 let g:proj_run3='silent !gvim %f'
 
-nmap <silent> <Leader>P <Plug>ToggleProject
+nmap <silent> <leader>P <Plug>ToggleProject
 
 
 " ---------------------------------------------------------------
